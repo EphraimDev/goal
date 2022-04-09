@@ -12,7 +12,11 @@ app.use(express.json());
 
 app.use(cors());
 
+app.get("/", (req, res) => res.send("decimal god is live"))
+
 app.use('/app', routeUrls);
+
+app.use("*", (req, res) => res.send("Route does not exist"))
 
 app.use(errorHandler)
 
