@@ -26,8 +26,8 @@ if(process.env.NODE_ENV === 'production'){
         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
     })
 }
-
-const server = app.listen(4000, () => console.log("server is running"));
+const port = process.env.PORT || 4000;
+const server = app.listen(port, () => console.log("server is running on port "+port));
 
 mongoose.connect(process.env.aces, {
     useNewUrlParser: true,
