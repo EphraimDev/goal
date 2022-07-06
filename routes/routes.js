@@ -2,38 +2,34 @@ const express = require ('express');
 const router = express.Router();
 
 const { signup,
-    confirm,
     login,
     forgotpassword,
     resetpassword,
     create,
+    verify
 } = require('../controllers/auth');
 
 const { userProfile } = require('../controllers/user');
 
-const { predictions } = require('../controllers/predictions');
+//const { predictions } = require('../controllers/predictions');
 
 const { protect } = require('../middleware/protect')
 
 const { created } = require('../controllers/created');
 
-const { crated } = require('../middleware/crated')
-
-router.route('/account').get(protect, userProfile);
+router.route('/verify/:confirmAccountToken').post(verify);
 
 router.route('/forum').get(protect, userProfile);
 
 router.route('/signup').post(signup);
 
-router.route('/confirm').post(confirm);
-
 router.route('/login').post(login);
 
-router.route('/create').post(create);
+router.route('/create').post(protect, create);
 
-router.route('/created').get(crated, created);
+router.route('/created').get(created);
 
-router.route('/predictions').get(predictions);
+//router.route('/predictions').get(predictions);
 
 router.route('/forgotpassword').post(forgotpassword);
 

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { GENERATEOTP } = require('../utils/otp');
 
 const template = new mongoose.Schema({
     username:{
@@ -27,7 +28,15 @@ const template = new mongoose.Schema({
         default: Date.now
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+
+    confirmAccountToken: String,
+    confirmAccountExpire: Date,
+
+    isVerified:{
+        type: Boolean,
+        default: false,
+    }
 });
 
 template.pre('save', async function(next){
@@ -42,18 +51,19 @@ template.methods.getSignedToken = function(){
 }
 
 template.methods.getResetPasswordToken = function(){
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    // const resetToken = crypto.randomBytes(20).toString('hex');
+    // this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.resetPasswordToken = GENERATEOTP();
 
     this.resetPasswordExpire = Date.now() + 10 * (60 * 1000);
     return resetToken;
 }
 
-template.methods.getConfirmPasswordToken = function(){
+template.methods.getConfirmAccountToken = function(){
     const confirmToken = crypto.randomBytes(20).toString('hex');
-    this.ConfirmPasswordToken = crypto.createHash('sha256').update(confirmToken).digest('hex');
+    this.confirmAccountToken = crypto.createHash('sha256').update(confirmToken).digest('hex');
 
-    this.ConfirmPasswordExpire = Date.now() + 10 * (60 * 1000);
+    this.confirmAccountExpire = Date.now() + 60 * (60 * 1000);
     return confirmToken;
 }
 
