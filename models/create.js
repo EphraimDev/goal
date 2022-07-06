@@ -29,6 +29,10 @@ const template = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+   author:{
+       type: mongoose.Schema.Types.ObjectId,
+       ref: 'users'
+   }
 })
 
 module.exports = mongoose.model('create', template);

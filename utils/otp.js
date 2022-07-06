@@ -1,8 +1,5 @@
 var  User = require("../models/users");
 var  jwt = require("jsonwebtoken");
-const  SendOtp = require("../utils/otp");
-
-const  sendOtp = new  SendOtp("****otpcredentials****");
 
 const SENDOTP = (req,res) => {
     sendOtp.send(req.body.phoneNumber, "***senderID***", (err, data) => {
@@ -12,7 +9,7 @@ const SENDOTP = (req,res) => {
         : res.json({ success:  false });
     });
 }
-const VERIFYOTP = (res,res) => {
+const VERIFYOTP = (req,res) => {
     sendOtp.verify(req.body.phoneNumber, req.body.otp, function(err, data) {
         if (err) return  res.json({ err });
         if (data.type == "success") {
@@ -60,4 +57,5 @@ const VERIFYOTP = (res,res) => {
         if (data.type == "error") res.json({ success:  false, message:  data.message });
     });
 }
-module.exports = { SENDOTP, VERIFYOTP }
+const GENERATEOTP = () => Math.floor(100000 + Math.random() * 900000)
+module.exports = { SENDOTP, VERIFYOTP, GENERATEOTP }

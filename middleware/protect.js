@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const templateCopy = require('../models/users');
 const ErrorResponse = require('../utils/errorResponse')
 
-exports.protect = async (req, res, next) =>{
+exports.protect = async (req, res, next ) =>{
     try {
         let token;
         if(req.headers.authorization){
