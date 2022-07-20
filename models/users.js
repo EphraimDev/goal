@@ -64,7 +64,7 @@ template.methods.getConfirmAccountToken = function(){
     this.confirmAccountToken = crypto.createHash('sha256').update(confirmToken).digest('hex');
 
     this.confirmAccountExpire = Date.now() + 60 * (60 * 1000);
-    return confirmToken;
+    return this.confirmAccountToken;
 }
 
 module.exports = mongoose.model('users', template);
