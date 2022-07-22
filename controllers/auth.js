@@ -77,7 +77,7 @@ exports.verify = async (req, res, next) =>{
                     user.save(function (err) {
                         // error occur
                         if(err){
-                            return res.status(500).send({msg: err.message});
+                            return res.status(500).send( err.message);
                         }
                         // account successfully verified
                         else{
