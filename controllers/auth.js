@@ -14,7 +14,8 @@ exports.signup = async (req, res, next) =>{
         const securePassword = await bcrypt.hash(req.body.password, saltPassword);
 
         const user = new templateCopy({
-            ...req.body
+            ...req.body,
+            password: securePassword
         })
 
         const {username,
@@ -39,32 +40,57 @@ exports.signup = async (req, res, next) =>{
     }
 };
 
-exports.verify = function (req, res, next) {
-    templateCopy.findOne({ confirmAccountToken }, function (err, user) {
-        // not valid user
-        if (!user){
-            return res.status(401).send({msg:'We were unable to find a user for this verification. Please SignUp!'});
-        } 
-        // user is already verified
-        else if (user.isVerified){
-            return res.status(200).send('User has been already verified. Please Login');
-        }
-        // verify user
-        else{
-            // change isVerified to true
-            user.isVerified = true;
-            user.save(function (err) {
-                // error occur
-                if(err){
-                    return res.status(500).send({msg: err.message});
+exports.verify = async (req, res, next) =>{
+
+    const {confirmAccountToken} = req.params
+
+    // templateCopy.findOne({ 
+    //     confirmAccountToken,
+    //     confirmTokenExpire: {gt: Date.now}
+    // }, function ( token) {
+        
+    //     token.confirmAccountToken = undefined;
+    //     token.confirmAccountExpire = undefined;
+
+    //     if (!token){
+    //         return res.status(400).send({msg:'Your verification link has expired. Please click on resend to verify your Account.'});
+    //     }
+    //     // if token not expired then check valid user 
+    //     else{
+            templateCopy.findOne({ confirmAccountToken }, function (err, user) {
+                // not valid user
+                if (!user){
+                    return res.status(401).send('We were unable to find a user for this verification. Please SignUp!');
+                } 
+                //user is already verified
+                if (user.isVerified){
+                    return res.status(200).send('User has been already verified. Please Login');
                 }
-                // account successfully verified
+                // verify user
                 else{
-                  return res.status(200).send('Your account has been successfully verified');
+                    // change isVerified to true
+                    user.isVerified = true;
+        
+                    user.confirmAccountToken = undefined;
+                    user.confirmAccountExpire = undefined;
+                    
+                    user.save(function (err) {
+                        // error occur
+                        if(err){
+                            return res.status(500).send({msg: err.message});
+                        }
+                        // account successfully verified
+                        else{
+                          return res.status(200).send('Your account has been successfully verified');
+                        }
+                    });
                 }
             });
-        }
-    });
+        //}
+    //})
+
+    
+    
 }
 
 exports.resendLink = function (req, res, next) {
@@ -115,6 +141,11 @@ exports.login = async (req, res) =>{
         const {username, password} = req.body
         let user = await templateCopy.findOne({ username })
 
+        if(!user.isVerified){
+            return errorHandler({message: "Email not verified, click on the link sent to your mail to verify your account",
+             statusCode: 400}, res)
+        }
+
         if(user) {
             const validPassword = await bcrypt.compare(
                 password, user.password
@@ -127,11 +158,10 @@ exports.login = async (req, res) =>{
         }else{
             return errorHandler({message: "User does not exist, Please Sign up", statusCode: 400}, res)
         }
-        if(!user.isVerified){
-            return errorHandler({message: "Email not verified", statusCode: 400}, res)
-        }
+        
+        
     }catch(error){
-        return errorHandler({message: "Check your Internet", statusCode: 500}, res)
+        return errorHandler({message: "Check your Interweb", statusCode: 504}, res)
     }
 };
 
@@ -153,13 +183,13 @@ exports.create = async (req, res, next) =>{
 };
 
 exports.forgotpassword = async (req, res, next) =>{
-    const { emailOrPhone } = req.body;
+    const { email } = req.body;
 
     try {
-        const user = await templateCopy.findOne({$or: [{email: emailOrPhone}, {phone: emailOrPhone}]});
+        const user = await templateCopy.findOne({ email });
 
         if(!user){
-            return next(new ErrorResponse("Email could not be sent", 404))
+            return errorHandler({message: "user not found, kindly register", statusCode: 404}, res)
         }
 
         const resetToken = user.getResetPasswordToken();
@@ -189,7 +219,7 @@ exports.forgotpassword = async (req, res, next) =>{
 
             await user.save();
 
-            return next(new ErrorResponse("Email could not be sent", 500));
+            return errorHandler({message: "invalid email", statusCode: 500}, res);
         }
     } catch (error) {
         next(error);

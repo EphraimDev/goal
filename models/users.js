@@ -51,12 +51,12 @@ template.methods.getSignedToken = function(){
 }
 
 template.methods.getResetPasswordToken = function(){
-    // const resetToken = crypto.randomBytes(20).toString('hex');
-    // this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    this.resetPasswordToken = GENERATEOTP();
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    //this.resetPasswordToken = GENERATEOTP();
 
-    this.resetPasswordExpire = Date.now() + 10 * (60 * 1000);
-    return resetToken;
+    this.resetPasswordExpire = Date.now() + 1 * (60 * 1000);
+    return this.resetPasswordToken;
 }
 
 template.methods.getConfirmAccountToken = function(){
@@ -64,7 +64,7 @@ template.methods.getConfirmAccountToken = function(){
     this.confirmAccountToken = crypto.createHash('sha256').update(confirmToken).digest('hex');
 
     this.confirmAccountExpire = Date.now() + 60 * (60 * 1000);
-    return confirmToken;
+    return this.confirmAccountToken;
 }
 
 module.exports = mongoose.model('users', template);
