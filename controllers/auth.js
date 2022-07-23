@@ -66,24 +66,31 @@ exports.verify = async (req, res, next) =>{
                 if (user.isVerified){
                     return res.status(200).send('User has been already verified. Please Login');
                 }
+                if (user.confirmAccountExpire < Date.now()) {
+                  return res
+                    .status(400)
+                    .send("Your token has expired. Please resend a new token");
+                }
                 // verify user
-                else{
-                    // change isVerified to true
-                    user.isVerified = true;
-        
-                    user.confirmAccountToken = undefined;
-                    user.confirmAccountExpire = undefined;
-                    
-                    user.save(function (err) {
-                        // error occur
-                        if(err){
-                            return res.status(500).send( err.message);
-                        }
-                        // account successfully verified
-                        else{
-                          return res.status(200).send('Your account has been successfully verified');
-                        }
-                    });
+                else {
+                  // change isVerified to true
+                  user.isVerified = true;
+
+                  user.confirmAccountToken = undefined;
+                  user.confirmAccountExpire = undefined;
+
+                  user.save(function (err) {
+                    // error occur
+                    if (err) {
+                      return res.status(500).send(err.message);
+                    }
+                    // account successfully verified
+                    else {
+                      return res
+                        .status(200)
+                        .send("Your account has been successfully verified");
+                    }
+                  });
                 }
             });
         //}
