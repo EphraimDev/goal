@@ -33,6 +33,6 @@ router.route('/created').get(created);
 
 router.route('/forgotpassword').post(forgotpassword);
 
-router.route('/resetpassword/:resetToken').put(resetpassword);
+router.route('/resetpassword/:resetPasswordToken').put(resetpassword);
 
 module.exports = router;

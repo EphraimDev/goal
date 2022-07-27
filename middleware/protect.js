@@ -18,6 +18,11 @@ exports.protect = async (req, res, next ) =>{
             return next(new ErrorResponse("User Not Found", 404))
         }
 
+        if(!user.isVerified){
+            return errorHandler({message: "Email not verified, click on the link sent to your mail to verify your account",
+             statusCode: 400}, res)
+        }
+
         req.user = user;
 
         next();
