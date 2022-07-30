@@ -10,7 +10,7 @@ exports.sendConfirmAccountEmail = async (user) =>{
 
         await user.save()
 
-        const confirmUrl = `http:localhost:3000/verify/${confirmToken}`;
+        const confirmUrl = `${process.env.MAIL_URL}/verify/${confirmToken}`;
         const message = `<h1>Account Confirmation</h1>
             <p>Click on this link to confirm your Account
             The link will expire in 1hr</p>
