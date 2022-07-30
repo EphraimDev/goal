@@ -6,7 +6,8 @@ const { signup,
     forgotpassword,
     resetpassword,
     create,
-    verify
+    verify,
+    resendLink
 } = require('../controllers/auth');
 
 const { userProfile } = require('../controllers/user');
@@ -18,6 +19,8 @@ const { protect } = require('../middleware/protect')
 const { created } = require('../controllers/created');
 
 router.route('/verify/:confirmAccountToken').post(verify);
+
+router.route("/resend-link/").post(resendLink);
 
 router.route('/forum').get(protect, userProfile);
 

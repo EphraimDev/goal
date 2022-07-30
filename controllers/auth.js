@@ -46,39 +46,25 @@ exports.signup = async (req, res, next) => {
 
 exports.verify = async (req, res, next) => {
   const { confirmAccountToken } = req.params;
-
-  // templateCopy.findOne({
-  //     confirmAccountToken,
-  //     confirmTokenExpire: {gt: Date.now}
-  // }, function ( token) {
-
-  //     token.confirmAccountToken = undefined;
-  //     token.confirmAccountExpire = undefined;
-
-  //     if (!token){
-  //         return res.status(400).send({msg:'Your verification link has expired. Please click on resend to verify your Account.'});
-  //     }
-  //     // if token not expired then check valid user
-  //     else{
   templateCopy.findOne({ confirmAccountToken }, function (err, user) {
     // not valid user
     if (!user) {
-      return res
-        .status(401)
-        .send(
-          "We were unable to find a user for this verification. Please SignUp!"
-        );
+      return res.status(401).send({
+        message:
+          "We were unable to find a user for this verification. Please SignUp!",
+      });
     }
     //user is already verified
     if (user.isVerified) {
       return res
         .status(200)
-        .send("User has been already verified. Please Login");
+        .send({ message: "User has been already verified. Please Login" });
     }
     if (user.confirmAccountExpire < Date.now()) {
-      return res
-        .status(400)
-        .send("Your token has expired. Please resend a new token");
+      return res.status(400).send({
+        message: "Your token has expired. Please resend a new token",
+        data: user,
+      });
     }
     // verify user
     else {
@@ -97,7 +83,7 @@ exports.verify = async (req, res, next) => {
         else {
           return res
             .status(200)
-            .send("Your account has been successfully verified");
+            .send({ message: "Your account has been successfully verified" });
         }
       });
     }
@@ -108,46 +94,26 @@ exports.verify = async (req, res, next) => {
 
 exports.resendLink = function (req, res, next) {
   templateCopy.findOne({ email: req.body.email }, function (err, user) {
-    // user is not found into database
-    if (!user) {
-      return res.status(400).send({
-        msg: "We were unable to find a user with that email. Make sure your Email is correct!",
+    if(err){
+      return res.status(500).send({
+        message:
+          "An error occured. Please try again",
       });
     }
     // user has been already verified
-    else if (user.isVerified) {
+    if (user.isVerified) {
       return res
         .status(200)
-        .send("This account has been already verified. Please log in.");
+        .send({
+          message: "This account has been already verified. Please log in.",
+        });
     }
     // send verification link
-    else {
-      token.save(async function (err) {
-        if (err) {
-          return res.status(500).send({ msg: err.message });
-        }
-
-        try {
-          await sendEmail({
-            to: user.email,
-            subject: "Account Confirmation",
-            text: message,
-          });
-
-          res.status(200).json({
-            success: true,
-            data: "Email Sent",
-          });
-        } catch (error) {
-          user.confirmPasswordToken = undefined;
-          user.confirmPasswordExpire = undefined;
-
-          await user.save();
-
-          return next(new ErrorResponse("Email could not be sent", 500));
-        }
-      });
-    }
+    sendConfirmAccountEmail(user);
+    res.status(200).json({
+      success: true,
+      message: "Email Sent",
+    });
   });
 };
 
@@ -261,7 +227,9 @@ exports.resetpassword = async (req, res, next) => {
       resetPasswordExpire: { $gt: Date.now() },
     });
     if (!user) {
-      return res.status(400).send("Invalid reset token. Please resend your password reset token");
+      return res
+        .status(400)
+        .send("Invalid reset token. Please resend your password reset token");
     }
 
     const saltPassword = await bcrypt.genSalt(10);
