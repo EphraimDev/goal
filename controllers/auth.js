@@ -47,19 +47,6 @@ exports.signup = async (req, res, next) => {
 exports.verify = async (req, res, next) => {
   const { confirmAccountToken } = req.params;
 
-  // templateCopy.findOne({
-  //     confirmAccountToken,
-  //     confirmTokenExpire: {gt: Date.now}
-  // }, function ( token) {
-
-  //     token.confirmAccountToken = undefined;
-  //     token.confirmAccountExpire = undefined;
-
-  //     if (!token){
-  //         return res.status(400).send({msg:'Your verification link has expired. Please click on resend to verify your Account.'});
-  //     }
-  //     // if token not expired then check valid user
-  //     else{
   templateCopy.findOne({ confirmAccountToken }, function (err, user) {
     // not valid user
     if (!user) {

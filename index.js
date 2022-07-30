@@ -14,7 +14,7 @@ app.use(cors());
 
 app.get("/", (req, res) => res.send("decimal god is live"))
 
-app.use('https://decgd.herokuapp.com', routeUrls);
+app.use('/app', routeUrls);
 
 app.use("*", (req, res) => res.send("Route does not exist"))
 
